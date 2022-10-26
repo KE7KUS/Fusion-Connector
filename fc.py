@@ -71,7 +71,7 @@ class FileSystem:
   def makeSdDirectoryStruct(location = PurePath(), radio = 'FTM400XDR'):
 
     """Function to create System Fusion directory structure at specified location. """
-  
+    # TODO: Update to utilize the 'radio' arg in the def.
     fs = ds["ftm400xdr"]
     structure = parse(fs)
     print(structure)
@@ -87,8 +87,29 @@ class Message:
   def makeQsoMng(msg_count = 0, pic_count = 0, gm_count = 0):
 
     """Function to create QSOMNG.dat system file."""
+
+    def padInt(x):
+      x = str(x).rjust(4,'\u0030')
+      print(x)
+      x = binascii.unhexlify(x)
+      print(x)
+      return x
+
+    msg_count = padInt(msg_count)
+    pic_count = padInt(pic_count)
+    gm_count = padInt(gm_count)  
+
+    with open('QSOMNG.dat', 'wb') as f:
+      f.seek(0,0)
+      f.write(msg_count)
+      while f.tell() < 16:
+        f.write(binascii.unhexlify('FF'))
+      f.seek(16,0)
+      f.write(pic_count + gm_count)
+      while f.tell() < 32:
+        f.write(binascii.unhexlify('FF'))
     
-  def makeQsoMsg(msg = b''):
+  def makeQsoMsg(msg = ''):
 
     """Function to create QSOMSG.dat system file."""
 
@@ -123,4 +144,4 @@ class Picture:
     pass
 
 if __name__ == "__main__":
-  FileSystem.makeSdDirectoryStruct()
+  Message.makeQsoMng(1,3,5)
